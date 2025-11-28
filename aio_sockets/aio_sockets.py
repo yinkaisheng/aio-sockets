@@ -136,13 +136,16 @@ class UDPSocket:
         self.protocol.raise_if_error()
 
     async def recvfrom(self) -> Tuple[bytes, IPAddress]:
+        """
+        You should catch exceptions when calling this method.
+        """
         data_and_addr = await self.protocol.recvfrom()
         self.protocol.raise_if_error()
         return data_and_addr
 
     async def recvfrom_timeout(self, timeout: float = 10) -> Tuple[bytes, IPAddress]:
         """
-        You should catch TimeoutError when calling this method.
+        You should catch TimeoutError or other exceptions when calling this method.
         """
         return await wait_for(self.recvfrom(), timeout=timeout)
 
