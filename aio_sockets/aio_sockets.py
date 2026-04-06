@@ -58,7 +58,9 @@ class TCPSocket:
 
     async def recv_timeout(self, n: int = 8192, timeout: float = 10) -> bytes:
         """
-        You should catch TimeoutError when calling this method.
+        You should catch asyncio.TimeoutError when calling this method.
+        Python 3.8 raises asyncio.TimeoutError, which is not builtins.TimeoutError.
+        Python 3.11+ raises asyncio.TimeoutError, which is aliased to builtins.TimeoutError.
         """
         return await wait_for(self.reader.read(n), timeout=timeout)
 
@@ -145,7 +147,9 @@ class UDPSocket:
 
     async def recvfrom_timeout(self, timeout: float = 10) -> Tuple[bytes, IPAddress]:
         """
-        You should catch TimeoutError or other exceptions when calling this method.
+        You should catch asyncio.TimeoutError or other exceptions when calling this method.
+        Python 3.8 raises asyncio.TimeoutError, which is not builtins.TimeoutError.
+        Python 3.11+ raises asyncio.TimeoutError, which is aliased to builtins.TimeoutError.
         """
         return await wait_for(self.recvfrom(), timeout=timeout)
 
