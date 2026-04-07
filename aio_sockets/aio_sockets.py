@@ -10,7 +10,7 @@ from asyncio import FIRST_COMPLETED
 from asyncio.streams import _DEFAULT_LIMIT
 
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 IPv4Address = Tuple[str, int]
 IPv6Address = Tuple[str, int, int, int]  # (host, port, flow_info, scope_id)
@@ -55,6 +55,9 @@ class TCPSocket:
 
     async def recv_exactly(self, n: int) -> bytes:
         return await self.reader.readexactly(n)
+
+    async def recv_until(self, separator: bytes = b'\n') -> bytes:
+        return await self.reader.readuntil(separator)
 
     async def recv_timeout(self, n: int = 8192, timeout: float = 10) -> bytes:
         """
