@@ -10,7 +10,7 @@ from asyncio import FIRST_COMPLETED
 from asyncio.streams import _DEFAULT_LIMIT
 
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 IPv4Address = Tuple[str, int]
 IPv6Address = Tuple[str, int, int, int]  # (host, port, flow_info, scope_id)
