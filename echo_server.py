@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# author: yinkaisheng@foxmail.com
-# support python 3.8+
+# Compatible with Python 3.8+
+
 import sys
 import json
 import socket

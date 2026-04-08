@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# author: yinkaisheng@foxmail.com
-# support python 3.8+
+# Compatible with Python 3.8+
+
 import os
 import sys
 import json
 import socket
+import asyncio
 from datetime import datetime
 
 import aio_sockets as aio
-from log_util import Fore, log
+from log_util import Fore, log, logger, config_logger
 
 # do not create a asyncio Queue, Event, etc. in global scope in python3.9 or lower version,
 #   otherwise it will cause error: attached to a different loop
 # if you create a asyncio Queue in global scope in python3.9 or lower version,
 #   await queue.get() will block forever even the producer puts an item to queue later
 _echo_queue: aio.Queue = None
+
+
+aio.aio_sockets.logger  = logger
 
 
 async def tcp_client(server_ip: str, server_port: int, timeout: int = 5):
@@ -42,7 +45,7 @@ async def tcp_client(server_ip: str, server_port: int, timeout: int = 5):
             if not data:
                 log(f'server closed connection from {laddr}')
                 break
-        except TimeoutError as ex:
+        except asyncio.TimeoutError as ex:
             log(f'{laddr} recv timeout, ex={ex!r}')
         input = await _echo_queue.get()
         if input == 'q':
@@ -108,6 +111,7 @@ async def async_main(server: str, port: int, udp: bool, count: int):
 
 
 def main(server: str, port: int, udp: bool, count: int):
+    config_logger(logger, log_level='info')
     print(f'{Fore.Magenta}press {Fore.Green}Enter{Fore.Magenta} to send message, press {Fore.Red}q{Fore.Magenta} to exit{Fore.Reset}')
     aio.run(async_main(server, port, udp, count))
 

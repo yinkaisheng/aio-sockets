@@ -1,22 +1,23 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# author: yinkaisheng@foxmail.com
-# support python 3.8+
-from typing import (Any, Awaitable, Callable, Coroutine, List, Optional, Set, Tuple, Union)
+# Compatible with Python 3.8+
+
 import asyncio
 from asyncio import Event, Queue, Task
 from asyncio import (all_tasks, base_events, create_task, gather, get_running_loop,
                      run, sleep, wait, wait_for)
 from asyncio import FIRST_COMPLETED
 from asyncio.streams import _DEFAULT_LIMIT
+from typing import (Any, Awaitable, Callable, Coroutine, List, Optional, Set, Tuple, Union)
+
+from .logger import LoggerLike, StdoutLogger
 
 
 __version__ = '0.1.3'
+logger: LoggerLike = StdoutLogger()
 
 IPv4Address = Tuple[str, int]
 IPv6Address = Tuple[str, int, int, int]  # (host, port, flow_info, scope_id)
 IPAddress = Union[IPv4Address, IPv6Address]
-logfunc = print
+
 
 
 try:
@@ -204,9 +205,9 @@ async def wait_all_tasks_done(tasks: List[Task] = None, log_result: bool = True)
         if log_result:
             for task, result in zip(tasks, ret):
                 if isinstance(result, Exception):
-                    logfunc(f'task: {Green}{task.get_name()}{Reset} function: {Cyan}{task.get_coro().__name__}{Reset} gets an exception: {Magenta}{result!r}{Reset}')
+                    logger.error(f'task: {Green}{task.get_name()}{Reset} function: {Cyan}{task.get_coro().__name__}{Reset} gets an exception: {Magenta}{result!r}{Reset}')
                 else:
-                    logfunc(f'task: {Green}{task.get_name()}{Reset} function: {Cyan}{task.get_coro().__name__}{Reset} returns: {result!r}')
+                    logger.info(f'task: {Green}{task.get_name()}{Reset} function: {Cyan}{task.get_coro().__name__}{Reset} returns: {result!r}')
         return
 
     task_empty_times = 0
@@ -219,7 +220,7 @@ async def wait_all_tasks_done(tasks: List[Task] = None, log_result: bool = True)
             if task.get_name() == 'Task-1':
                 # Task-1 is the main task(called by asyncio.run), must remove it
                 # coro = task.get_coro()
-                # logfunc(task.get_name(), coro.__name__, task, coro)
+                # logger.info(task.get_name(), coro.__name__, task, coro)
                 tasks.remove(task)
                 break
         if tasks:
@@ -228,9 +229,9 @@ async def wait_all_tasks_done(tasks: List[Task] = None, log_result: bool = True)
             if log_result:
                 for task, result in zip(tasks, ret):
                     if isinstance(result, Exception):
-                        logfunc(f'task: {Green}{task.get_name()}{Reset} function: {Cyan}{task.get_coro().__name__}{Reset} gets an exception: {Magenta}{result!r}{Reset}')
+                        logger.error(f'task: {Green}{task.get_name()}{Reset} function: {Cyan}{task.get_coro().__name__}{Reset} gets an exception: {Magenta}{result!r}{Reset}')
                     else:
-                        logfunc(f'task: {Green}{task.get_name()}{Reset} function: {Cyan}{task.get_coro().__name__}{Reset} returns: {result!r}')
+                        logger.info(f'task: {Green}{task.get_name()}{Reset} function: {Cyan}{task.get_coro().__name__}{Reset} returns: {result!r}')
             task_empty_times = 0
         else:
             task_empty_times += 1
