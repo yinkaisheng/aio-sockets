@@ -3,9 +3,10 @@
 # author: yinkaisheng@foxmail.com
 # support python 3.8+
 from typing import (Any, Awaitable, Callable, Coroutine, List, Optional, Set, Tuple, Union)
-from asyncio import DatagramProtocol, DatagramTransport, Event, StreamReader, StreamWriter, Queue, Task, TimeoutError
-from asyncio import (all_tasks, base_events, create_task, gather, get_running_loop, open_connection,
-                     run, sleep, start_server, trsock, wait, wait_for)
+import asyncio
+from asyncio import Event, Queue, Task
+from asyncio import (all_tasks, base_events, create_task, gather, get_running_loop,
+                     run, sleep, wait, wait_for)
 from asyncio import FIRST_COMPLETED
 from asyncio.streams import _DEFAULT_LIMIT
 
@@ -42,7 +43,7 @@ except ImportError:
 
 
 class TCPSocket:
-    def __init__(self, reader: StreamReader, writer: StreamWriter):
+    def __init__(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         self.reader = reader
         self.writer = writer
 
@@ -87,23 +88,23 @@ class TCPSocket:
 async def start_tcp_server(client_connected_cb: Callable[[TCPSocket], Awaitable[None]],
                            ip: str = None, port: int = None,
                            *, limit=_DEFAULT_LIMIT, **kwds) -> base_events.Server:
-    async def tcp_client_cb(reader: StreamReader, writer: StreamWriter):
+    async def tcp_client_cb(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         sock = TCPSocket(reader, writer)
         await client_connected_cb(sock)
-    return await start_server(tcp_client_cb, ip, port, limit=limit, **kwds)
+    return await asyncio.start_server(tcp_client_cb, ip, port, limit=limit, **kwds)
 
 
 async def open_tcp_connection(host: str = None, port: int = None, *, limit=_DEFAULT_LIMIT, **kwds) -> TCPSocket:
-    reader, writer = await open_connection(host, port, limit=limit, **kwds)
+    reader, writer = await asyncio.open_connection(host, port, limit=limit, **kwds)
     return TCPSocket(reader, writer)
 
 
-class UDPProtocol(DatagramProtocol):
+class UDPProtocol(asyncio.DatagramProtocol):
     def __init__(self, queue_size: int):
         self.error: Optional[Exception] = None
         self.packets_queue = Queue(queue_size)
 
-    def connection_made(self, transport: DatagramTransport) -> None:
+    def connection_made(self, transport: asyncio.DatagramTransport) -> None:
         pass # real type: proactor_events._ProactorDatagramTransport
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
@@ -132,7 +133,7 @@ class UDPSocket:
     Use function `asyncudp.create_udp_socket()` to create an instance of this class.
     """
 
-    def __init__(self, transport: DatagramTransport, protocol: UDPProtocol):
+    def __init__(self, transport: asyncio.DatagramTransport, protocol: UDPProtocol):
         self.transport = transport
         self.protocol = protocol
 
@@ -179,7 +180,7 @@ async def create_udp_socket(local_addr: Tuple[str, int] = None, remote_addr: Tup
                         allow_broadcast=None,
                         sock=None,
                         queue_size: int = 0) -> UDPSocket:
-    transport: DatagramTransport
+    transport: asyncio.DatagramTransport
     protocol: UDPProtocol
     transport, protocol = await get_running_loop().create_datagram_endpoint(
         lambda: UDPProtocol(queue_size),
