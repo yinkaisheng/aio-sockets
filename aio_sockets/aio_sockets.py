@@ -11,7 +11,7 @@ from typing import (Any, Awaitable, Callable, Coroutine, List, Optional, Set, Tu
 from .logger import LoggerLike, StdoutLogger
 
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 logger: LoggerLike = StdoutLogger()
 
 IPv4Address = Tuple[str, int]
